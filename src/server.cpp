@@ -31,7 +31,7 @@ int main(){
 
 	if(listen(serverFD, 3) < 0){
 		auto ec = std::error_code(errno, std::system_category());
-		std::cerr << "failed to linten" << ec.message() << std::endl;
+		std::cerr << "failed to listen" << ec.message() << std::endl;
 		return 1;
 	}
 
