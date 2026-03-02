@@ -1,22 +1,11 @@
-#include<iostream>
-#include<sys/socket.h>
-#include<netinet/in.h>
-#include<system_error>
-#include<string>
-#include<unistd.h>
+#include "server.hpp"
 
-int main(){
-	
-	int serverFD = -1;
-	int newSocket = -1;
-	sockaddr_in address{};
-	const int PORT = 8080;
-
+Server::Server(/* args */)
+{
 	if((serverFD = socket(AF_INET, SOCK_STREAM, 0)) < 0){
 		
 		auto ec = std::error_code(errno, std::system_category());
 		std::cerr << "failed to open socket" << ec.message() << std::endl;
-		return 1;
 	}
 
 	address.sin_family = AF_INET;
@@ -26,13 +15,11 @@ int main(){
 	if(bind(serverFD,(sockaddr*)&address,sizeof(address)) < 0){
 		auto ec = std::error_code(errno, std::system_category());
 		std::cerr << "failed to bind" << ec.message() << std::endl;
-		return 1;
 	}
 
 	if(listen(serverFD, 3) < 0){
 		auto ec = std::error_code(errno, std::system_category());
 		std::cerr << "failed to listen" << ec.message() << std::endl;
-		return 1;
 	}
 
 	socklen_t addrLen = sizeof(address);
@@ -41,22 +28,31 @@ int main(){
 
 		auto ec = std::error_code(errno, std::system_category());
 		std::cerr << "accept failed" << ec.message() << std::endl;
-		return 1;
 	}
+}
 
+Server::~Server()
+{
+	close(newSocket);
+	close(serverFD);
+}
+
+void Server::readFromClient()
+{
 	std::string buffer(1024, '\0');
 	long long valRead = read(newSocket, buffer.data(), buffer.size());
 	buffer.resize(valRead > 0 ? valRead : 0);
 
-	if(buffer.size() == 0){
+	if(buffer.empty()){
 		std::cout << "No bytes are there to read" << std::endl;
 	}
+	else{
+		std::cout << buffer << std::endl;
+	}
+}
 
+void Server::writeToClient()
+{
 	std::string helloMsg = "Hello from Server";
 	write(newSocket, helloMsg.data(), helloMsg.size());
-
-	close(newSocket);
-
-	return 0;
-
-};
+}
