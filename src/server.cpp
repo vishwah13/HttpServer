@@ -53,6 +53,7 @@ void Server::readFromClient()
 
 void Server::writeToClient()
 {
-	std::string helloMsg = "Hello from Server";
+	std::string helloMsg = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
 	write(newSocket, helloMsg.data(), helloMsg.size());
+	std::cout << "Hello Msg sent" << std::endl;
 }
